@@ -1,0 +1,3 @@
+pip install pyserial
+pip install flask-socketio
+pip install flask
