@@ -6,6 +6,7 @@ __pycache__/
 
 # Ignorar el entorno virtual
 venv/
+.venv/
 
 # Ignorar archivos de configuración local
 instance/
