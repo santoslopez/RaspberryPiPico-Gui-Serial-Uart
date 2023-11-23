@@ -10,7 +10,7 @@ venv/
 # Ignorar archivos de configuración local
 instance/
 .env
-
+.DS_Store
 # Ignorar archivos de registro y caché
 logs/
 *.log

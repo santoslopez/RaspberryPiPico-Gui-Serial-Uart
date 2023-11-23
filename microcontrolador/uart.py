@@ -11,6 +11,7 @@ def ConfigurarRaspberryPiPico(id,baudrate,tx,rx):
     return UART(id,baudrate,tx=Pin(tx),rx=Pin(rx))
 
 uart_usb = ConfigurarRaspberryPiPico(0,valorBaudarte,0,1)
+#uartRaspberry = ConfigurarRaspberryPiPico(1,valorBaudarte,4,5)
 uartRaspberry = ConfigurarRaspberryPiPico(1,valorBaudarte,4,5)
 
 
@@ -20,8 +21,7 @@ flagSTARTED = "STARTED"
 # Configura la conexión serial UART para la comunicación entre Raspberry Pi Picos
 def enviarMensaje(uart, mensaje):
     uart.write(mensaje)
-    uart.write('\n')
-    sleep(0.5)
+    uart.write("\n")
 
 def recibirMensaje(uart):
     if uart.any() > 0:
@@ -46,6 +46,8 @@ def protocoloMensajesUART(uartRaspberry,uart_usb):
         # se obtiene el primer |
         simboloOR1R=mensajeDecodificadoR[3:4]
         hostReceptorR=mensajeDecodificadoR[4:7]
+        print("RECEPROTR:",hostReceptorR)
+
         # se obtiene el segundo |
         simboloOR2R=mensajeDecodificadoR[7:8]
         # idMensaje
@@ -80,12 +82,14 @@ def protocoloMensajesUART(uartRaspberry,uart_usb):
                 enviarMensaje(uartRaspberry,mensajeCompletoReenviar)
         else:
             print("No se realizo nada porque no hay datos en la raspberry.")
-            #enviarMensaje(uartRaspberry,mensajeCompletoReenviar)
-            #enviarMensaje(uart_usb,mensajeCompletoReenviar)
+            enviarMensaje(uartRaspberry,mensajeCompletoReenviar)
+            print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:",mensajeCompletoReenviar)
+            enviarMensaje(uart_usb,mensajeDecodificadoR+"SANTOSSSSSSSSSS")
             
 
 
 while True:
+    sleep(1)
     # Esperar mensaje desde el servidor web (convertidor USB a serial)
     mensajeMiServidorWeb = recibirMensaje(uart_usb)
     if mensajeMiServidorWeb:

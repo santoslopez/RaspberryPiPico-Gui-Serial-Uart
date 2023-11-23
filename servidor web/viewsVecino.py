@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template,request,redirect,url_for,jsonify
+from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session
 import sqlite3
 
 
@@ -9,8 +9,11 @@ VecinosView = Blueprint('VecinosView',__name__)
 @VecinosView.route('/vecinos')
 #@app.route('/vecinos')
 def vecinos():
-    return render_template('vecinos.html')
-
+    if "usuarioSesion" in session:
+        return render_template('vecinos.html',usuarioSesion=session["usuarioSesion"])
+    else:
+        return redirect(url_for('index'))
+    
 @VecinosView.route('/obtenerVecinos')
 #@app.route('/obtenerVecinos')
 def obtenerVecinos():
@@ -48,9 +51,8 @@ def registrarVecino():
                 conexion.commit()
                 conexion.close()
                 print("Registro insertado correctamente")
+                return redirect(url_for('VecinosView.vecinos'))
         except Exception as e:
             print("Error en la inserción de datos de vecino")
             print(e)
-        finally:
-            print("estoy en finally")
-            return redirect(url_for('index'))
+       

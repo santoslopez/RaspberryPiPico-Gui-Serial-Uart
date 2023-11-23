@@ -15,11 +15,11 @@
 <body>
 
     <div class="container" style="margin-left:5%;margin-right:5%;margin-top:5%">
-        
-
-
-
         <div class="alert alert-primary" role="alert">
+            <h1 class="text-center">Usuario: {{ usuarioSesion }}</h1>
+            id usuario: {{ idUsuario }}
+
+
             <h2 class="text-center">Historial de mensajes de Raspberry Pi Pico</h2>
         </div>
 
@@ -34,9 +34,9 @@
         <!--li class="nav-item">
           <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Home</a>
         </li-->
-        <!--li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li-->
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}">Cerrar sesion</a>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Vecinos
@@ -110,20 +110,24 @@ $(document).ready(function () {
         // Recargar los datos de la DataTable cuando se actualizan
         tablaMensajes.ajax.reload();
     });*/
+    
+    </script>
+<script>
      var socket = io.connect('http://' + document.domain + ':' + location.port);
 
       socket.on('datos_actualizados', function (msg) {
         // Buscar la fila con el ID correspondiente
-        var fila = tablaMensajes.row('#' + msg.id);
+        /*var fila = tablaMensajes.row('#' + msg.id);
 
         // Actualizar la fila si existe, de lo contrario, agregarla
         if (fila.length) {
             fila.data(msg).draw(false); // Actualizar datos sin volver a dibujar la tabla completa
         } else {
             tablaMensajes.row.add(msg).draw(); // Agregar una nueva fila
-        }
+        }*/
+        //alert("estoy aqui: "+msg)
     });
-    </script>
+     </script>
     <!--script>
         $(document).ready(function() {
         //let tabla = new DataTable('#example');
