@@ -2,142 +2,119 @@ import time
 from machine import Pin, UART
 from time import sleep
 
-HOSTNAME = "GP5"
+HOSTNAME="santos"
 
 valorBaudarte = 9600
-
 # Ajusta los pines TX y RX según tu configuración
 def ConfigurarRaspberryPiPico(id,baudrate,tx,rx):
     return UART(id,baudrate,tx=Pin(tx),rx=Pin(rx))
 
+
 uart_usb = ConfigurarRaspberryPiPico(0,valorBaudarte,0,1)
-#uartRaspberry = ConfigurarRaspberryPiPico(1,valorBaudarte,4,5)
 uartRaspberry = ConfigurarRaspberryPiPico(1,valorBaudarte,4,5)
-
-
-mensajeINIT = "INIT"
-flagSTARTED = "STARTED"
+mensajeINIT="INIT"
+flagSTARTED="STARTED"
+simboloOR="|"
 
 # Configura la conexión serial UART para la comunicación entre Raspberry Pi Picos
 def enviarMensaje(uart, mensaje):
-    uart.write(mensaje)
-    uart.write("\n")
+    uart.write(mensaje+'\n')
+    sleep(1)
+    #uart.write('\n')
 
 def recibirMensaje(uart):
     if uart.any() > 0:
-        #print("estoy aquiiii")
-        #variable = uart.read()
         
-        #print("validando variables: ",variable)
         return uart.read()
     else:
         return None
-    
-def protocoloMensajesUART(uartRaspberry,uart_usb):
-    mensajeDeOtrosRaspberryPiPico = recibirMensaje(uartRaspberry)
-    
-    if mensajeDeOtrosRaspberryPiPico:
-        #print("Me enviaron de otros raspberrys:",mensajeDeOtrosRaspberryPiPico.decode('utf-8')+"\n")
-        # mensajeDecodificadoR = mensajeDeOtrosRaspberryPiPico.decode("utf-8")
-        mensajeDecodificadoR = mensajeDeOtrosRaspberryPiPico.decode("utf-8")
 
-        print("Mensaje que me enviaron de Raspberry Pi Pico:",mensajeDecodificadoR)
-        hostEmisorR=mensajeDecodificadoR[0:3]
-        # se obtiene el primer |
-        simboloOR1R=mensajeDecodificadoR[3:4]
-        hostReceptorR=mensajeDecodificadoR[4:7]
-        print("RECEPROTR:",hostReceptorR)
-
-        # se obtiene el segundo |
-        simboloOR2R=mensajeDecodificadoR[7:8]
-        # idMensaje
-        idMensajeR = mensajeDecodificadoR[8:10]
-        simboloOR3R = mensajeDecodificadoR[10:11]
-        hasBeenReceivedR = mensajeDecodificadoR[11:12]
-        simboloR4R= mensajeDecodificadoR[12:13]
-        longitudMensajeRecibidoR = len(mensajeDecodificadoR)
-        mensajeCompletoR= mensajeDecodificadoR[13:20].strip()
-        # utilizo la variable en caso sea necesario enviarlo a alguien mas
-        mensajeCompletoReenviar = hostEmisorR+simboloOR1R+hostReceptorR+simboloOR2R+idMensajeR+simboloOR3R+hasBeenReceivedR+simboloR4R+mensajeCompletoR
-        
-        # valido que el mensaje que me envia es para mi
-        
-        if hostReceptorR.lower()==HOSTNAME.lower() or hostReceptorR.upper()==HOSTNAME.upper():
-            if mensajeCompletoR == mensajeINIT:
-                idNuevoConfirmacion = 1
-                nuevoMensajeR = hostEmisorR+simboloOR1R+hostReceptorR+simboloOR2R+idMensajeR+simboloOR3R+str(idNuevoConfirmacion)+simboloR4R+"STARTED"
-                enviarMensaje(uartRaspberry,nuevoMensajeR)
-                enviarMensaje(uart_usb,nuevoMensajeR)
-                print("Inicie el comando para conectarme con el host receptor: ",hostReceptorR)
-            elif ((mensajeCompletoR.upper() == flagSTARTED.upper()) or (mensajeCompletoR.lower() == flagSTARTED.lower())):
-                idNuevoConfirmacion = 1
-                nuevoMensajeR = hostEmisorR+simboloOR1R+hostReceptorR+simboloOR2R+idMensajeR+simboloOR3R+str(idNuevoConfirmacion)+simboloR4R+"CONECTADO"
-                enviarMensaje(uart_usb,nuevoMensajeR)
-                enviarMensaje(uartRaspberry,nuevoMensajeR)
-                print("Estoy conectado con el host receptor: ",hostEmisorR)
-            else:
-                idNuevoConfirmacion = 0
-                print("Comando de mensaje no detectado: "+mensajeCompletoR + ". El mensaje completo es: "+mensajeCompletoReenviar+". Se envio nuevamente")
-                enviarMensaje(uart_usb,mensajeCompletoReenviar)
-                enviarMensaje(uartRaspberry,mensajeCompletoReenviar)
-        else:
-            print("No se realizo nada porque no hay datos en la raspberry.")
-            enviarMensaje(uartRaspberry,mensajeCompletoReenviar)
-            print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:",mensajeCompletoReenviar)
-            enviarMensaje(uart_usb,mensajeDecodificadoR+"SANTOSSSSSSSSSS")
-            
-
-
+contador=0
 while True:
-    sleep(1)
-    # Esperar mensaje desde el servidor web (convertidor USB a serial)
-    mensajeMiServidorWeb = recibirMensaje(uart_usb)
-    if mensajeMiServidorWeb:
-        print("Mensaje recibido desde el servidor web:",mensajeMiServidorWeb.decode('utf-8'))
-        
-        mensajeRecibidoDecodificado = mensajeMiServidorWeb.decode('utf-8')
-
-
-        hostEmisor = mensajeRecibidoDecodificado[0:3]
-        # se obtiene el primer |
-        simboloOR1 = mensajeRecibidoDecodificado[3:4]
-        hostReceptor = mensajeRecibidoDecodificado[4:7]
-        # se obtiene el segundo |
-        simboloOR2 = mensajeRecibidoDecodificado[7:8]
-        # idMensaje
-        idMensaje = mensajeRecibidoDecodificado[8:10]
-        simboloOR3 = mensajeRecibidoDecodificado[10:11]
-        hasBeenReceived = mensajeRecibidoDecodificado[11:12]
-        simboloOR4 = mensajeRecibidoDecodificado[12:13]
-        longitudMensajeRecibido = len(mensajeRecibidoDecodificado)
-        mensajeCompleto = mensajeRecibidoDecodificado[13:longitudMensajeRecibido].strip()
-        longitudMensajeRecibido = len(mensajeRecibidoDecodificado)
-            
-        
-        nuevoMensaje = hostEmisor+simboloOR1+hostReceptor+simboloOR2+idMensaje+simboloOR3+hasBeenReceived+simboloOR4+mensajeCompleto
-        print("Mensaje del servidor web: ",nuevoMensaje)          
+    contador+=1
     
-        # verificar que el mensaje que recibi tiene como destinatario a mi hostname
-        if hostEmisor.lower()==HOSTNAME or hostEmisor.upper()==HOSTNAME:
-            print("Yo envie el mensaje desde mi formulario ahora lo voy a enviar",hostReceptor)
-                                
-            #nuevoFormatoMensaje = hostEmisor+simboloOR1+hostReceptor+simboloOR2+idMensaje+simboloOR3+hasBeenReceived+simboloOR4+mensajeSTARTED
-            if mensajeCompleto==mensajeINIT:
+    mensajeRecibidoServidorWeb = recibirMensaje(uart_usb)
+    if mensajeRecibidoServidorWeb:
+        decodificarMensajeDesdeServidor = mensajeRecibidoServidorWeb.decode('utf-8')
+        if decodificarMensajeDesdeServidor==mensajeINIT:
+            print("El servidor web inicio el comando: ",decodificarMensajeDesdeServidor)
+            # se envia el mensaje al Raspberry que este conectado a mi controlador (Raspberry)
+            enviarMensaje(uartRaspberry ,mensajeINIT)
+            print("Se ha enviado el mensaje :",mensajeINIT+ " al Raspberry Pi Pico")
+        else:
+            mensajeSplit = decodificarMensajeDesdeServidor.split("|")
+            longitudMensaje = len(mensajeSplit)
+            # debido al formato del mensaje establecido como protocolo: Host emisor|Host receptor|idMensaje|hasBeenReceivedR|mensaje
+            # para que me incluya el texto mensaje
+            if longitudMensaje>=5:
+                hostEmisor=mensajeSplit[0]
+                #global HOSTNAME
                 
-                print("Acabo de enviar el mensaje a :",hostReceptor)
-                enviarMensaje(uart_usb,nuevoMensaje)
-                enviarMensaje(uartRaspberry,nuevoMensaje)            
-            elif mensajeCompleto==flagSTARTED:
+                #HOSTNAME = hostEmisor
+                hostReceptor=mensajeSplit[1]
+                idMensaje=mensajeSplit[2]
+                hasBeenReceived=mensajeSplit[3]
+                mensajeCompleto = mensajeSplit[4]
+                mensajeCompletoEnviar = hostEmisor+simboloOR+hostReceptor+simboloOR+idMensaje+simboloOR+hasBeenReceived+simboloOR+mensajeCompleto
                 
-                #print("E:",hostReceptor)
-                print("Se envio el mensaje: ",nuevoMensaje + " desde el servidor web a la raspberry pi pico")
-                #enviarMensaje(uart_usb,nuevoMensaje)
+                print("El servidor web envio el siguiente formato de mensaje: ",decodificarMensajeDesdeServidor)
+                print("El Raspberry emisor es: ",hostEmisor)
+                print("El Raspberry receptor es: ",hostReceptor)
+                print("El id del mensaje es: ",idMensaje)
+                print("Estado actual del mensaje: ",hasBeenReceived)
+                print("El mensaje con el formato del protocolo enviado es: ",mensajeCompletoEnviar)
+                enviarMensaje(uartRaspberry,mensajeCompletoEnviar)
 
-                enviarMensaje(uartRaspberry,nuevoMensaje)
-            else:
-                print("El comando del mensaje no se detecto sin embargo se envio el mensaje")
-                #enviarMensaje(uart_usb,nuevoMensaje)
+    mensajeRecibidoDesdeOtrasRaspberrys = recibirMensaje(uartRaspberry)
+    if mensajeRecibidoDesdeOtrasRaspberrys:
+        decodificarMensajeDeRasperrys= mensajeRecibidoDesdeOtrasRaspberrys.decode('utf-8')
+        print("Se ha recibido el mensaje ",decodificarMensajeDeRasperrys+ " de otra Raspberry")
+        if decodificarMensajeDeRasperrys.strip()==mensajeINIT:
+            print("Se ha recibido el mensaje ",mensajeINIT+ " de otra Raspberry")
+            print("Se envio el mensaje ",flagSTARTED+ " a la otra Raspberry")
+            enviarMensaje(uart_usb,flagSTARTED)
+            enviarMensaje(uartRaspberry,flagSTARTED)
 
-                enviarMensaje(uartRaspberry,nuevoMensaje)
-    # aqui mandar a llamar al metodo
-    protocoloMensajesUART(uartRaspberry,uart_usb)
+        elif decodificarMensajeDeRasperrys.strip()==flagSTARTED:
+            print("Me han enviado el mensaje:",flagSTARTED + " desde la otra Raspberry")
+            print("Enviando formato completo de mensaje: ")
+            enviarMensaje(uart_usb,decodificarMensajeDeRasperrys)
+            enviarMensaje(uartRaspberry,decodificarMensajeDeRasperrys)
+        else:
+            mensajeSplit = decodificarMensajeDeRasperrys.split("|")
+            longitudMensaje = len(mensajeSplit)
+            # debido al formato del mensaje establecido como protocolo: Host emisor|Host receptor|idMensaje|hasBeenReceivedR|mensaje
+            # para que me incluya el texto mensaje
+            if longitudMensaje>=5:
+                hostEmisor=mensajeSplit[0]
+                hostReceptor=mensajeSplit[1]
+                idMensaje=mensajeSplit[2]
+                hasBeenReceived=mensajeSplit[3]
+                mensajeCompleto = mensajeSplit[4]
+                
+                confirmarRecepcionMensaje = 1
+                mensajeCompletoEnviar = hostEmisor+simboloOR+hostReceptor+simboloOR+str(idMensaje)+simboloOR+str(confirmarRecepcionMensaje)+simboloOR+mensajeCompleto
+                
+                
+                if hostReceptor== HOSTNAME:
+                    print("Mensaje dirigido para mi")
+                    print("Mensaje ",decodificarMensajeDeRasperrys + " recibido de Raspberry emisor: "+hostEmisor)
+                    print("El Raspberry emisor es: ",hostEmisor)
+                    print("El Raspberry receptor es: ",hostReceptor)
+                    print("El id del mensaje es: ",idMensaje)
+                    print("Estado actual del mensaje: ",hasBeenReceived)
+                    print("El mensaje enviado es: ",mensajeCompletoEnviar + ". Actualice el estado de recepcion del mensaje a 1")
+                    enviarMensaje(uartRaspberry,mensajeCompletoEnviar)
+                    sleep(0.5)
+                    enviarMensaje(uart_usb,mensajeCompletoEnviar)
+                    sleep(0.5)
+
+                else:
+                    print("Mensaje recibido con formato del protocolo: ",decodificarMensajeDeRasperrys)
+                    print("El Raspberry receptor: ",hostReceptor+  " no va dirigido para mi ("+HOSTNAME+"). Se reenvio el mensaje porque no es para mi")
+                    nuevoMensaje = mensajeCompletoEnviar+"_Reenviado"
+                    print("xxxxxxx: ",mensajeCompletoEnviar)
+                    #enviarMensaje(uartRaspberry,nuevoMensaje)
+                    enviarMensaje(uart_usb,nuevoMensaje)
+    #else:
+        #print("estoy en el else: ",mensajeRecibidoDesdeOtrasRaspberrys)
