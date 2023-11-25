@@ -31,8 +31,6 @@ def obtenerVecinos():
     # el nombre de data se utiliza en el datatable para recuperar los datos
     return jsonify({'data': formatoJSON})
 
-
-
 @VecinosView.route('/registrarVecino',methods=['POST'])
 def registrarVecino():
     if request.method == "POST":

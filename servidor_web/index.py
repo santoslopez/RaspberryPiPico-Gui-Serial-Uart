@@ -67,17 +67,15 @@ def obtenerPuertosCOM():
     com_ports = [port.device for port in serial.tools.list_ports.comports()]
     return com_ports
 
-
 def abrirPuerto(puerto):
     try:
         if not serial_port.is_open:
-            #serial_port.close()
             serial_port.port=puerto
             serial_port.baudrate=valorBaudarate
             serial_port.open()
         return True,"Puerto abierto correctamente"
     except Exception as e:
-        registroLog.info(f"Error al abrir el puerto:{e}")
+        registroLog.info(f"Error al abrir el puerto: {e}")
         return False,f"Error al abrir el puerto: {e}"
 
 def leerPuerto():
@@ -89,20 +87,44 @@ def leerPuerto():
     if serial_port.is_open and serial_port.in_waiting > 0:
         try:
             while True:
-            
                 line = serial_port.readline().decode('utf-8')
+                
+                if not line:
+                    print("No hay datos recibidos")
+                    break
+                
                 # el mensaje se envia desde la raspberry pi pico
                 mensajeRecibido = str(line)
-                print("estoy aqui en mensaje recibido: ",mensajeRecibido)
+ 
+                #print("estoy aqui en mensaje recibido: ",mensajeRecibido)
                 obtenerFechaHora = datetime.now()
                 formatearFecha = obtenerFechaHora.strftime("%d/%m/%Y %H:%M:%S")
                             
                 conexion = sqlite3.connect(nombreBaseDatos)
-                cursor = conexion.cursor()
+                cursor = conexion.cursor()  
+
+                #print("El mensaje recibido esYYY:",line.strip())
+
+                if mensajeRecibido.strip() == "INIT":
+                    print("Se ha recibido el mensaje INIT")
                     
-                 
-                cursor.execute("insert into mensajes(tipoMensaje,mensaje,fecha,idUsuario) values (?, ?, ?,?)", ("Recibido",mensajeRecibido,formatearFecha,idUsuarioSes))
-                conexion.commit()
+                    #continue
+                    cursor.execute("insert into mensajes(tipoMensaje,mensaje,fecha,idUsuario) values (?, ?, ?,?)", ("Recibido",mensajeRecibido,formatearFecha,idUsuarioSes))
+                    
+                    cursor.execute("insert into mensajes(tipoMensaje,mensaje,fecha,idUsuario) values (?, ?, ?,?)", ("Enviado","STARTED",formatearFecha,idUsuarioSes))
+                    conexion.commit()
+
+                    serial_port.write("STARTED".encode('utf-8'))
+
+
+                    #conexion.close()
+                    socketio.emit('datos_actualizados', {'data': line})
+                else:
+                    cursor.execute("insert into mensajes(tipoMensaje,mensaje,fecha,idUsuario) values (?, ?, ?,?)", ("Recibido",mensajeRecibido,formatearFecha,idUsuarioSes))
+                    
+                    conexion.commit()
+                    #conexion.close()                    
+
                 registroLog.info(f"Se recibio el mensaje: {mensajeRecibido} y se almaceno en la base de datos.")
                 
                 socketio.emit('datos_actualizados', {'data': line})
@@ -122,34 +144,33 @@ def leerPuerto():
 def listaPuertos():
     puertos = obtenerPuertosCOM()    
     if request.method =='POST':
-        return render_template("puerto.html", puertosCOM=puertos)
+        return render_template("main/puerto.html", puertosCOM=puertos)
 
-    return render_template("puerto.html", puertosCOM=puertos)
-
+    return render_template("main/puerto.html", puertosCOM=puertos)
 
 @app.route('/',methods=['GET','POST'])
 def index():
     if "usuarioSesion" in session:
         idUsuarioSes = session["idUsuario"]
 
-        return render_template("index.html",usuarioSesion=session["usuarioSesion"],idUsuario=idUsuarioSes)
+        return render_template("main/index.html",usuarioSesion=session["usuarioSesion"],idUsuario=idUsuarioSes)
     else:
         flash("No has iniciado sesión")
-    return render_template("login.html")
+    return render_template("auth/login.html")
        
 @app.route('/fmrLogin',methods=['GET','POST'])
 def frmLogin():
     if "usuarioSesion" in session:
         idUsuarioSes = session["idUsuario"]
-        return render_template("index.html",idUsuario=idUsuarioSes,usuarioSesion=session["usuarioSesion"])
+        return render_template("main/index.html",idUsuario=idUsuarioSes,usuarioSesion=session["usuarioSesion"])
     else:
         flash("No has iniciado sesión")
         registroLog.info("El usuario no ha iniciado sesion redirigido al login.")
-        return render_template("login.html")
+        return render_template("auth/login.html")
     
 @app.route('/frmRegistroCuenta',methods=['GET','POST'])
 def frmRegistroCuenta():
-    return render_template("frmRegistroCuenta.html")
+    return render_template("auth/frmRegistroCuenta.html")
 
 @app.route('/registroCuenta',methods=["POST"])
 def registroCuenta():
@@ -159,7 +180,7 @@ def registroCuenta():
         
         if not usuarioGuardar or not passwordGuardar:
             flash("Debes ingresar un usuario y una contraseña","error")
-            return render_template("frmRegistroCuenta.html")
+            return render_template("auth/frmRegistroCuenta.html")
         else:
             with sqlite3.connect(nombreBaseDatos) as conexion:
                 cursor = conexion.cursor()
@@ -167,17 +188,10 @@ def registroCuenta():
                 conexion.commit()
                 registroLog.info("El usuario se ha guardado correctamente.")
 
-                return render_template("registroExitoso.html")
+                return render_template("auth/registroExitoso.html")
     else:
-        return render_template("frmRegistroCuenta.html")
+        return render_template("auth/frmRegistroCuenta.html")
     
-# cerrar la sesion del usuario
-@app.route('/logout',methods=['GET','POST'])
-def logout():
-    session.pop("usuarioSesion",None)
-    flash("Se ha cerrado la sesion correctamente","sucess")
-    return redirect(url_for("frmLogin"))
-
 @app.route('/listarMensajes',methods=['GET','POST'])
 def listarMensajes():
     idUsuarioSes = session.get("idUsuario")
@@ -189,10 +203,10 @@ def listarMensajes():
         registroLog.info("Necesitas iniciar sesion para acceder al metodo /listarMensajes.")
 
         return redirect(url_for('login'))
-    else:
-        print("El id del usuario es: ",idUsuarioSes)
+    #else:
+        #print("El id del usuario es: ",idUsuarioSes)
     conexion = sqlite3.connect(nombreBaseDatos)
-    #print("Opened database successfully")
+   
     cursor = conexion.cursor() 
     cursor.execute("SELECT * FROM mensajes WHERE idUsuario=?",(convertirIDSesion))
 
@@ -204,7 +218,7 @@ def listarMensajes():
 
 def obtenerVecinos():
     conexion = sqlite3.connect(nombreBaseDatos)
-    print("Opened database successfully")
+    #print("Opened database successfully")
     conexion.row_factory = sqlite3.Row
     cursor = conexion.cursor()
     cursor.execute("select * from vecinos")
@@ -243,46 +257,66 @@ def login():
             usuarioSes = session["usuarioSesion"]
             idUsuarioSes = session["idUsuario"]
             flash("Inicio de sesion exitoso", "success")
-            return render_template("index.html",registroExitoso=True,usuarioSesion=usuarioSes,idUsuario=idUsuarioSes)
+            return render_template("main/index.html",registroExitoso=True,usuarioSesion=usuarioSes,idUsuario=idUsuarioSes)
         else:
             flash("Usuario o contraseña incorrectos","error")
-            return render_template("login.html",registroExitoso=False)
+            return render_template("auth/login.html",registroExitoso=False)
+
+# cerrar la sesion del usuario
+@app.route('/logout',methods=['GET','POST'])
+def logout():
+    session.pop("usuarioSesion",None)
+    flash("Se ha cerrado la sesion correctamente","sucess")
+    return redirect(url_for("frmLogin"))
 
 @app.route('/formularioEnvioMensaje',methods=['GET','POST'])
 def formularioEnvioMensaje():
     obtenerDatos = obtenerVecinos()
     if "usuarioSesion" in session:
         idUsuarioSes = session["idUsuario"]
-        return render_template("enviarMensaje.html",listadoVecinos=obtenerDatos,usuarioSesion=session["usuarioSesion"],idUsuario=idUsuarioSes)    
+        return render_template("main/enviarMensaje.html",listadoVecinos=obtenerDatos,usuarioSesion=session["usuarioSesion"],idUsuario=idUsuarioSes)    
     else:
         flash("No has iniciado sesión")
-        return render_template("login.html")
+        return render_template("auth/login.html")
     
 # Ruta de Flask para enviar mensajes
 @app.route('/enviarMensajeInicial', methods=['POST'])
 def enviarMensajeInicial():
+    mensajeInicial=""
+    txtHostEmisor=""
     if "usuarioSesion" in session:
         try:
             if serial_port.is_open:
                 if request.method == "POST":
-                    #mensajeInicial = request.form.get("txtEnviarMensaje")
                     # validar 
                     mensajeInicial = "INIT"
+                    #txtHostEmisor = request.form.get("txtHostEmisor")
+                    txtHostEmisor = request.form.get("txtHostEmisor")
 
                     obtenerFechaHora = datetime.now()
                     formatearFecha = obtenerFechaHora.strftime("%d/%m/%Y %H:%M:%S")
                     # convertir a entero
                     idUsu = int(idUsuarioSes)
-                    with sqlite3.connect(nombreBaseDatos) as conexion:
-                        cursor = conexion.cursor()
-                        cursor.execute("INSERT INTO mensajes(tipoMensaje,mensaje,fecha,idUsuario) VALUES (?,?,?,?)",
-                                        ("Enviado mensaje INIT",mensajeInicial, formatearFecha,idUsu))
-                        conexion.commit()
-                        registroLog.info(f"El mensaje: {mensajeInicial} se ha enviado al receptor.")
 
-                        serial_port.write(mensajeInicial.encode('utf-8'))
+                    if not txtHostEmisor:
+                        flash("Debes ingresar un usuario y una contraseña","error")
+                     
+                        return "noguardado"
+                
+                    else:
+                        print("El host emisor es: ",txtHostEmisor)
+                        enviarFormatoMensaje = f"{txtHostEmisor}"+"|INIT"
+                        print("Formato enviado es: ",enviarFormatoMensaje)
+                        with sqlite3.connect(nombreBaseDatos) as conexion:
+                            cursor = conexion.cursor()
+                            cursor.execute("INSERT INTO mensajes(tipoMensaje,mensaje,fecha,idUsuario) VALUES (?,?,?,?)",
+                                            ("Enviado mensaje INIT",mensajeInicial,formatearFecha,idUsu))
+                            conexion.commit()
+                            registroLog.info(f"El mensaje: {mensajeInicial} se ha enviado al receptor.")
 
-                        return "guardado"
+                            serial_port.write(enviarFormatoMensaje.encode('utf-8'))
+
+                            return "guardado"
 
             else:
                 abrirPuerto(PUERTO_DEFAULT)
@@ -298,7 +332,7 @@ def enviarMensajeInicial():
 
     else:
         flash("No has iniciado sesión")
-        return render_template("login.html")    
+        return render_template("auth/login.html")    
 
 # Ruta de Flask para enviar mensajes
 @app.route('/enviarMensaje', methods=['POST'])
@@ -357,7 +391,7 @@ def enviarMensaje():
 
     else:
         flash("No has iniciado sesión")
-        return render_template("login.html")
+        return render_template("auth/login.html")
 
 
 @socketio.on('connect')

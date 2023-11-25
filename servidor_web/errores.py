@@ -15,8 +15,8 @@ class ErrorHandlers:
         # manejo de error de metodo no permitido
         @app.errorhandler(405)
         def metodoNoPermitido(e):
-            return render_template('405.html'), 405
+            return render_template('error/405.html'), 405
 
         @app.errorhandler(404)
         def recursoNoEncontrado(e):
-            return render_template('404.html'), 404
+            return render_template('error/404.html'), 404
