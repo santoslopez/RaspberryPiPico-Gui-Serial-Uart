@@ -16,7 +16,7 @@
           <div class="card-body p-5 text-center">
 
             <h3 class="mb-5">Iniciar sesion</h3>
-            <form method="POST" action="/login">
+            <form method="POST" action="{{url_for('auth.login') }}">
             <div class="form-outline mb-4">
               <input type="text" id="txtUsuario" name="txtUsuario" class="form-control form-control-lg" required>
               <label class="form-label" for="typeEmailX-2">Usuario</label>

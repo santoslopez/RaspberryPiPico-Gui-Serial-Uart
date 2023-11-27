@@ -1,8 +1,10 @@
 from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session
 import sqlite3
 
+from database import nombreBaseDatos
 
-DATABASE = 'database.db'
+
+#DATABASE = 'database.db'
 
 VecinosView = Blueprint('VecinosView',__name__)
 
@@ -10,14 +12,14 @@ VecinosView = Blueprint('VecinosView',__name__)
 #@app.route('/vecinos')
 def vecinos():
     if "usuarioSesion" in session:
-        return render_template('vecinos.html',usuarioSesion=session["usuarioSesion"])
+        return render_template('main/vecinos.html',usuarioSesion=session["usuarioSesion"])
     else:
         return redirect(url_for('index'))
     
 @VecinosView.route('/obtenerVecinos')
 #@app.route('/obtenerVecinos')
 def obtenerVecinos():
-    conexion = sqlite3.connect(DATABASE)
+    conexion = sqlite3.connect(nombreBaseDatos)
     print("Opened database successfully")
     conexion.row_factory = sqlite3.Row
 
@@ -42,7 +44,7 @@ def registrarVecino():
                 return redirect(url_for('index'))
             else:
                 
-                conexion = sqlite3.connect(DATABASE)
+                conexion = sqlite3.connect(nombreBaseDatos)
                 print("Opened database successfully")
                 cursor = conexion.cursor()
                 cursor.execute("insert into vecinos(nombreGrupo) values(?)",(nombre,))

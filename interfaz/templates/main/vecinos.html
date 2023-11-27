@@ -1,15 +1,15 @@
 {% extends 'layout.html' %}
 
-{% block title %}Vecinos{% endblock %}
+{% block title %}Listado de Raspberry Pi Pico{% endblock %}
 {% block content %}
 <div class="alert alert-primary" role="alert">
-    <h2 class="text-center">Listado de vecinos</h2>
+    <h2 class="text-center">Listado de Raspberry Pi Pico</h2>
 </div>        
 <table id="tablaVecinos" class="display" style="width:100%"> 
     <thead>
     <tr>
         <th>ID</th>
-        <th>Nombre grupo</th>
+        <th>Nombre Raspberry</th>
     </tr>
     </thead>
     <tbody> 
@@ -19,7 +19,7 @@
 <div class="d-grid gap-2 col-6 mx-auto">
     <a type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Registrar vecino</a>
     <a href="{{ url_for('index') }}" class="btn btn-primary" type="button">Menu principal</a>
-    <a href="{{ url_for('formularioEnvioMensaje') }}" type="button" class="btn btn-success">Enviar mensaje</a>
+    <a href="{{ url_for('ViewMensajes.formularioEnvioMensaje') }}" type="button" class="btn btn-success">Enviar mensaje</a>
 </div>
 
 <!-- INICIO MODAL -->
@@ -27,7 +27,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Datos grupo</h1>
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Datos Raspberry (con la que voy a conectarme)</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

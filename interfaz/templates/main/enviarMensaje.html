@@ -40,7 +40,7 @@
   </div>
   
 <button type="button" id="btnEnviarMensaje" class="btn btn-primary" onclick="enviarFormulario(event)">Enviar mensaje</button>
-<button type="button" id="btnEnviarMensajeINIT" class="btn btn-primary" onclick="enviarMensajeInit(event)">Enviar mensaje INIT</button>
+<button type="button" id="btnEnviarMensajeINIT" class="btn btn-success" onclick="enviarMensajeInit(event)">Enviar mensaje INIT</button>
 
 </form>
 
@@ -95,8 +95,9 @@
             $.ajax({
                 type: "POST",
                 url: "/enviarMensajeInicial",
-                data: $("#miFormulario").serialize(),
+                data: {txtHostEmisor:hostEmisor},
                 success: function(response) {
+                  
                   //console.log("sucess:"+response)
                   if  (response=="guardado"){
 

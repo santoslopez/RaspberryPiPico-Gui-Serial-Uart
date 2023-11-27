@@ -7,10 +7,10 @@ class ErrorHandlers:
         # manejo de errores 
         @socketio.on_error_default
         def default_error_handler(e):
-            print('Error en socketio')
-            print(request.event["message"])
-            print(request.event["args"])
-            print(e)
+            print('Error en socketio. El error que se produjo es: ', e)
+            #print(request.event["message"])
+            #print(request.event["args"])
+            #print(e)
 
         # manejo de error de metodo no permitido
         @app.errorhandler(405)
