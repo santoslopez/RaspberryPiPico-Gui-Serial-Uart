@@ -1,14 +1,19 @@
 {
     "builds": [
-        {
-            "src": "servidor/index.py",
-            "use": "vercel/python"
-        }
+      {
+        "src": "servidor/index.py",
+        "use": "@vercel/python"
+      }
     ],
     "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "servidor/index.py"
-        }
+      {
+        "src": "/servidor/(.*)",
+        "dest": "/servidor/index.py"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/servidor/index.py"
+      }
     ]
-}
+  }
+  
