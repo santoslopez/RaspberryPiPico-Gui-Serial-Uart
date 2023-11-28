@@ -7,12 +7,12 @@
     ],
     "routes": [
       {
-        "src": "/servidor/(.*)",
-        "dest": "/servidor/index.py"
+        "src": "servidor/(.*)",
+        "dest": "servidor/index.py"
       },
       {
         "src": "/(.*)",
-        "dest": "/servidor/index.py"
+        "dest": "servidor/index.py"
       }
     ]
   }
