@@ -1,18 +1,29 @@
 from flask import render_template,redirect,url_for,flash,session,Blueprint
 from flask import request
 from database import nombreBaseDatos
+from functools import wraps
+
 
 from logger import registroLog
 import sqlite3
 
 auth = Blueprint('auth',__name__)
 
+
+
+# realizar la consulta de login en sqlite 
+def queryLogin(usuario,passwordGuardar):
+    conexion = sqlite3.connect(nombreBaseDatos)
+    cursor = conexion.cursor()  
+    cursor.execute("select * from usuarios where usuario=? and password=?",(usuario,passwordGuardar,))
+    ejecutar = cursor.fetchall()
+    conexion.close()
+    return ejecutar
+
 @auth.route('/login',methods=['POST'])
+
 def login():
-    # Verificar si ya hay una sesión activa
-    if "usuarioSesion" in session:
-        # Ya hay una sesión activa, redirigir a la página principal
-        flash("Ya tienes una sesión activa", "info")
+    if "usuarioSesion" not in session:
         return redirect(url_for('index'))
     
     if request.method == 'POST':
@@ -20,11 +31,12 @@ def login():
         passwordGuardar = request.form.get("txtPassword")
 
         # validar usuario y password por medio de la base de datos sqlite
-        conexion = sqlite3.connect(nombreBaseDatos)
-        cursor = conexion.cursor()
-        cursor.execute("select * from usuarios where usuario=? and password=?",(usuario,passwordGuardar,))
-        ejecutar = cursor.fetchall()
-        conexion.close()
+        #conexion = sqlite3.connect(nombreBaseDatos)
+        #cursor = conexion.cursor()
+        #cursor.execute("select * from usuarios where usuario=? and password=?",(usuario,passwordGuardar,))
+        #ejecutar = cursor.fetchall()
+        #conexion.close()
+        ejecutar = queryLogin(usuario,passwordGuardar)
 
         # validar que el usuario y password sean correctos
         if len(ejecutar) > 0:

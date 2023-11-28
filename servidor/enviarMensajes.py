@@ -4,6 +4,7 @@ from puertoSerial import PUERTO_DEFAULT,serial_port,abrirPuerto
 from database import nombreBaseDatos
 from logger import registroLog
 from datetime import datetime
+from auth import login_requerido
 
 import sqlite3
 
@@ -35,6 +36,7 @@ def obtenerUltimoIDMensaje():
         return 0
 
 @ViewMensajes.route('/formularioEnvioMensaje',methods=['GET','POST'])
+
 def formularioEnvioMensaje():
     obtenerDatos = obtenerVecinos()
     if "usuarioSesion" in session:
@@ -85,7 +87,7 @@ def enviarMensajeInicial():
 
         except Exception as e:
         
-            print("Error en el envío del mensaje {e}")
+            print("Error en el envío del mensaje: ",{e})
             return "Error en el envío del mensaje {e}"
     else:
         flash("No has iniciado sesión")

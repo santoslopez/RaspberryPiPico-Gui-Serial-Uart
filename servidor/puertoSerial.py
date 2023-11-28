@@ -74,13 +74,12 @@ def leerPuerto():
                     conexion.commit()
 
                     serial_port.write("STARTED".encode('utf-8'))
-                    #conexion.close()
+                    conexion.close()
                     #socketio.emit('datos_actualizados', {'data': line})
                 else:
                     cursor.execute("insert into mensajes(tipoMensaje,mensaje,fecha,idUsuario) values (?, ?, ?,?)", ("Recibido",mensajeRecibido,formatearFecha,idUsuarioSes))
-                    
                     conexion.commit()
-                    #conexion.close()                    
+                    conexion.close()                    
 
                 registroLog.info(f"Se recibio el mensaje: {mensajeRecibido} y se almaceno en la base de datos.")
                 

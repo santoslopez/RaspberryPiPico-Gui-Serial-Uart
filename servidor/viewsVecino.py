@@ -3,7 +3,6 @@ import sqlite3
 
 from database import nombreBaseDatos
 
-
 #DATABASE = 'database.db'
 
 VecinosView = Blueprint('VecinosView',__name__)
@@ -19,6 +18,9 @@ def vecinos():
 @VecinosView.route('/obtenerVecinos')
 #@app.route('/obtenerVecinos')
 def obtenerVecinos():
+    if "usuarioSesion" not in session:
+        return redirect(url_for('index'))
+
     conexion = sqlite3.connect(nombreBaseDatos)
     print("Opened database successfully")
     conexion.row_factory = sqlite3.Row
@@ -35,6 +37,9 @@ def obtenerVecinos():
 
 @VecinosView.route('/registrarVecino',methods=['POST'])
 def registrarVecino():
+    if "usuarioSesion" not in session:
+        return redirect(url_for('index'))
+    
     if request.method == "POST":
         try:
             nombre = request.form.get("txtNombreGrupo")
