@@ -19,7 +19,7 @@
 
 <div align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/-Inicio-007bff?logo=home&logoColor=fff" alt="Inicio"/></a> | 
-  <a href="requerimientos.md"><img src="https://img.shields.io/badge/-Proyectos-28a745?logo=project-diagram&logoColor=fff" alt="Requerimientos"/></a> |
+  <a href="requerimientos.md"><img src="https://img.shields.io/badge/-Requerimientos-28a745?logo=project-diagram&logoColor=fff" alt="Requerimientos"/></a> |
   <a href="tecnologias.md"><img src="https://img.shields.io/badge/-Tecnologías-ff6347?logo=tools&logoColor=fff" alt="Tecnologías"/></a> |
   <a href="contactar.md"><img src="https://img.shields.io/badge/-Contacto-007bff?logo=envelope&logoColor=fff" alt="Contacto"/></a>
 </div>
